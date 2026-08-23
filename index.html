@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kitty Fit · Workout Schema & Tracker</title>
+<meta name="theme-color" content="#F79FC0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Kitty Fit">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blush:#FFF5F8; --soft-pink:#FFD9E6; --pink:#F79FC0; --raspberry:#E8517F;
+    --deep:#5A2A3C; --cream:#FFFDFB; --peach:#FFE9DA; --mint:#DDF3EC;
+    --shadow:0 6px 18px rgba(232,81,127,.12); --radius:22px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Nunito',sans-serif; background:var(--blush); color:var(--deep); line-height:1.6;
+    background-image:radial-gradient(var(--soft-pink) 1.5px, transparent 1.5px); background-size:34px 34px;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:32px 20px 80px}
+
+  header{
+    background:linear-gradient(135deg,#FFC2D8 0%,#FADDE8 55%,#FFE9DA 100%);
+    border-radius:var(--radius); padding:36px 32px 30px; text-align:center;
+    position:relative; box-shadow:var(--shadow); overflow:hidden;
+  }
+  header h1{font-family:'Fredoka',sans-serif;font-size:clamp(2rem,6vw,3rem);font-weight:700;color:var(--raspberry)}
+  header .sub{font-size:1.02rem;font-weight:600;margin-top:6px;max-width:580px;margin-left:auto;margin-right:auto}
+  .cat-hero{width:100px;height:auto;margin-bottom:6px}
+  .goal-pills{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+  .pill{background:var(--cream);border:2px solid var(--pink);border-radius:999px;padding:6px 16px;font-weight:800;font-size:.85rem;color:var(--raspberry)}
+  .paw-deco{position:absolute;opacity:.28;width:44px;height:auto}
+  .paw-deco.p1{top:14px;left:18px;transform:rotate(-18deg)}
+  .paw-deco.p2{bottom:12px;right:22px;transform:rotate(14deg)}
+
+  nav{
+    position:sticky;top:10px;z-index:50;margin-top:14px;
+    background:var(--cream);border:2px solid var(--soft-pink);border-radius:999px;
+    box-shadow:var(--shadow);display:flex;flex-wrap:wrap;justify-content:center;gap:2px;padding:6px;
+  }
+  nav a{
+    text-decoration:none;color:var(--deep);font-weight:800;font-size:.82rem;
+    padding:7px 14px;border-radius:999px;transition:.15s;
+  }
+  nav a:hover,nav a:focus-visible{background:var(--soft-pink);color:var(--raspberry);outline:none}
+
+  h2{font-family:'Fredoka',sans-serif;font-size:1.5rem;font-weight:600;color:var(--raspberry);margin:46px 0 6px;display:flex;align-items:center;gap:10px;scroll-margin-top:80px}
+  h2 svg{flex:none}
+  .lead{font-size:.97rem;margin-bottom:16px;max-width:660px}
+
+  .week{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:10px}
+  .day{background:var(--cream);border-radius:16px;padding:14px 10px 12px;text-align:center;box-shadow:var(--shadow);border:2px solid transparent;font-size:.82rem}
+  .day .dname{font-family:'Fredoka',sans-serif;font-weight:600;font-size:.95rem;color:var(--raspberry)}
+  .day .dwhat{font-weight:700;margin-top:4px}
+  .day .dtime{font-size:.74rem;opacity:.75;margin-top:2px}
+  .day.workout{border-color:var(--pink);background:linear-gradient(180deg,var(--cream),#FFEFF5)}
+  .day.rest{background:var(--mint)}
+  .day.optional{background:var(--peach)}
+  .day .emoji{font-size:1.2rem}
+
+  .card{
+    background:var(--cream);border-radius:var(--radius);box-shadow:var(--shadow);
+    margin-top:40px;padding:26px 24px 22px;position:relative;border:2px solid var(--soft-pink);
+  }
+  .card::before,.card::after{
+    content:"";position:absolute;top:-16px;width:0;height:0;
+    border-left:16px solid transparent;border-right:16px solid transparent;border-bottom:20px solid var(--soft-pink);
+  }
+  .card::before{left:36px;transform:rotate(-8deg)}
+  .card::after{left:84px;transform:rotate(8deg)}
+  .card h3{font-family:'Fredoka',sans-serif;font-size:1.3rem;font-weight:600;color:var(--raspberry);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .badge{background:var(--raspberry);color:#fff;border-radius:999px;padding:3px 12px;font-size:.7rem;font-weight:800;letter-spacing:.4px;text-transform:uppercase}
+  .card .meta{font-size:.85rem;font-weight:700;color:var(--raspberry);opacity:.85;margin:4px 0 12px}
+  .phase{font-family:'Fredoka',sans-serif;font-weight:500;font-size:.93rem;background:var(--soft-pink);display:inline-block;border-radius:999px;padding:3px 14px;margin:14px 0 6px}
+
+  .exlist{list-style:none}
+  .exlist>li{border-bottom:1px solid #FCE4EE;padding:4px 0}
+  .exlist>li:last-child{border-bottom:none}
+  details{padding:6px 4px}
+  summary{
+    cursor:pointer;list-style:none;display:flex;align-items:baseline;gap:10px;
+    font-weight:800;font-size:.94rem;flex-wrap:wrap;
+  }
+  summary::-webkit-details-marker{display:none}
+  summary .dose{margin-left:auto;font-weight:800;color:var(--raspberry);font-size:.85rem;white-space:nowrap}
+  summary .arrow{color:var(--pink);transition:.2s;font-size:.8rem}
+  details[open] summary .arrow{transform:rotate(90deg)}
+  .how{margin:8px 0 4px 20px;font-size:.87rem}
+  .how ol{margin-left:18px}
+  .how ol li{margin-bottom:2px}
+  .mistake{background:var(--peach);border-radius:10px;padding:6px 12px;font-size:.82rem;margin-top:8px;display:inline-block}
+  .gear{background:var(--mint);border-radius:10px;padding:6px 12px;font-size:.82rem;margin-top:6px;display:inline-block}
+  .circuit-note{background:var(--peach);border-radius:14px;padding:10px 16px;font-size:.86rem;font-weight:700;margin-top:12px}
+
+  table{width:100%;border-collapse:collapse;font-size:.92rem}
+  th{text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.6px;color:var(--raspberry);padding:8px 10px;border-bottom:2px solid var(--soft-pink)}
+  td{padding:9px 10px;border-bottom:1px solid #FCE4EE;vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  td.ex{font-weight:800}
+  td.note{font-size:.83rem;opacity:.85}
+
+  /* ---------- KALENDER ---------- */
+  .progressbar{background:var(--soft-pink);border-radius:999px;height:22px;overflow:hidden;margin:12px 0 4px;position:relative}
+  .progressbar .fill{background:linear-gradient(90deg,var(--pink),var(--raspberry));height:100%;width:0%;transition:width .4s;border-radius:999px}
+  .progressbar .plabel{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;color:var(--deep)}
+  .weekrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:1px solid #FCE4EE;padding:10px 0}
+  .weekrow:last-child{border-bottom:none}
+  .weekrow .wlabel{font-family:'Fredoka',sans-serif;font-weight:600;color:var(--raspberry);width:78px;flex:none}
+  .chk{display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none;font-size:.8rem;font-weight:800}
+  .chk input{position:absolute;opacity:0;pointer-events:none}
+  .chk .box{
+    width:30px;height:30px;border-radius:10px;border:2px solid var(--pink);background:#fff;
+    display:inline-flex;align-items:center;justify-content:center;font-size:1rem;transition:.15s;
+  }
+  .chk input:checked + .box{background:var(--raspberry);border-color:var(--raspberry)}
+  .chk input:checked + .box::after{content:"🐾"}
+  .chk input:focus-visible + .box{outline:3px solid var(--pink);outline-offset:2px}
+  .chk.optional .box{border-style:dashed;border-color:#E8B98F}
+  .chk.optional input:checked + .box{background:#F2A65A;border-color:#F2A65A}
+
+  .milestone{
+    background:linear-gradient(135deg,#FFE3EE,#FFF3E6);border:2px solid var(--pink);
+    border-radius:16px;padding:14px 16px;margin:14px 0;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  }
+  .milestone .mtxt{flex:1;min-width:200px}
+  .milestone b{font-family:'Fredoka',sans-serif;font-weight:600;color:var(--raspberry)}
+  .milestone .msub{font-size:.84rem}
+  .btn{
+    font-family:'Nunito',sans-serif;font-weight:800;font-size:.85rem;cursor:pointer;
+    background:var(--raspberry);color:#fff;border:none;border-radius:999px;padding:9px 20px;
+    box-shadow:0 4px 10px rgba(232,81,127,.3);transition:.15s;
+  }
+  .btn:hover{transform:translateY(-1px)}
+  .btn:focus-visible{outline:3px solid var(--pink);outline-offset:2px}
+  .btn.done{background:#4CAF8E;box-shadow:none;cursor:default}
+  .btn.secondary{background:var(--pink)}
+  .btn:disabled{background:#E6C6D2;box-shadow:none;cursor:not-allowed;transform:none}
+
+  /* ---------- NAIA ---------- */
+  .naia-flex{display:flex;gap:20px;flex-wrap:wrap;align-items:stretch}
+  .naia-today{flex:1;min-width:260px}
+  .naia-score{
+    flex:0 0 220px;background:linear-gradient(160deg,#FFD9E6,#FFE9DA);border-radius:18px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center;
+  }
+  .naia-score .num{font-family:'Fredoka',sans-serif;font-size:2.6rem;font-weight:700;color:var(--raspberry);line-height:1}
+  .naia-score .lbl{font-weight:800;font-size:.85rem;margin-top:4px}
+  .naia-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #FCE4EE;font-weight:800;font-size:.95rem}
+  .naia-item:last-of-type{border-bottom:none}
+  .naia-item .hint{font-size:.78rem;font-weight:600;opacity:.75;display:block}
+  #naiaMsg{margin-top:10px;font-weight:800;color:var(--raspberry);min-height:24px}
+  .naia-history{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+  .naia-history .dot{width:26px;height:26px;border-radius:50%;background:#F3D7E1;display:inline-flex;align-items:center;justify-content:center;font-size:.85rem}
+  .naia-history .dot.won{background:var(--raspberry)}
+  .naia-cat{width:84px;margin-bottom:6px}
+
+  .tips{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:16px}
+  .tip{background:var(--cream);border-radius:18px;padding:18px 18px 16px;box-shadow:var(--shadow);border:2px solid var(--soft-pink);font-size:.9rem}
+  .tip b{display:block;font-family:'Fredoka',sans-serif;font-weight:600;color:var(--raspberry);margin-bottom:4px;font-size:1rem}
+
+  .shoplist{list-style:none;margin-top:8px}
+  .shoplist li{padding:8px 0;border-bottom:1px solid #FCE4EE;font-size:.92rem}
+  .shoplist li:last-child{border-bottom:none}
+  .shoplist b{color:var(--raspberry)}
+
+  footer{text-align:center;margin-top:60px;font-size:.85rem;font-weight:700;color:var(--raspberry)}
+  footer .paw-row{display:flex;justify-content:center;gap:14px;margin-bottom:10px}
+  footer .paw-row svg{width:26px;opacity:.5}
+  .storage-note{font-size:.75rem;opacity:.6;font-weight:600;text-align:center;margin-top:8px}
+  @media print{body{background:none}.card{break-inside:avoid}nav{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <svg class="paw-deco p1" viewBox="0 0 64 64" fill="#E8517F"><ellipse cx="32" cy="42" rx="14" ry="11"/><circle cx="14" cy="26" r="6"/><circle cx="26" cy="18" r="6"/><circle cx="38" cy="18" r="6"/><circle cx="50" cy="26" r="6"/></svg>
+  <svg class="paw-deco p2" viewBox="0 0 64 64" fill="#E8517F"><ellipse cx="32" cy="42" rx="14" ry="11"/><circle cx="14" cy="26" r="6"/><circle cx="26" cy="18" r="6"/><circle cx="38" cy="18" r="6"/><circle cx="50" cy="26" r="6"/></svg>
+  <svg class="cat-hero" viewBox="0 0 120 110">
+    <polygon points="28,38 20,8 46,26" fill="#F79FC0"/><polygon points="92,38 100,8 74,26" fill="#F79FC0"/>
+    <polygon points="30,34 26,16 42,28" fill="#FFD9E6"/><polygon points="90,34 94,16 78,28" fill="#FFD9E6"/>
+    <circle cx="60" cy="62" r="40" fill="#F79FC0"/>
+    <circle cx="45" cy="56" r="5" fill="#5A2A3C"/><circle cx="75" cy="56" r="5" fill="#5A2A3C"/>
+    <circle cx="46.5" cy="54.5" r="1.6" fill="#fff"/><circle cx="76.5" cy="54.5" r="1.6" fill="#fff"/>
+    <path d="M56 68 Q60 72 64 68 L60 74 Z" fill="#E8517F"/>
+    <path d="M60 74 Q52 82 46 78" stroke="#5A2A3C" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+    <path d="M60 74 Q68 82 74 78" stroke="#5A2A3C" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+    <line x1="20" y1="60" x2="38" y2="62" stroke="#5A2A3C" stroke-width="2" stroke-linecap="round"/>
+    <line x1="20" y1="70" x2="38" y2="68" stroke="#5A2A3C" stroke-width="2" stroke-linecap="round"/>
+    <line x1="100" y1="60" x2="82" y2="62" stroke="#5A2A3C" stroke-width="2" stroke-linecap="round"/>
+    <line x1="100" y1="70" x2="82" y2="68" stroke="#5A2A3C" stroke-width="2" stroke-linecap="round"/>
+  </svg>
+  <h1>Kitty Fit</h1>
+  <p class="sub">Wekelijks thuis-schema + afvinkkalender + Naia-punten · gericht op vetverbranding met extra benen &amp; billen 🐾</p>
+  <div class="goal-pills">
+    <span class="pill">🎯 Doel: −5 à 7 kg</span>
+    <span class="pill">📅 Plan: 8-10 weken</span>
+    <span class="pill">🏠 Thuis · met klein materiaal</span>
+    <span class="pill">⏱️ 3-4 workouts per week</span>
+  </div>
+</header>
+
+<nav>
+  <a href="#schema">📅 Weekschema</a>
+  <a href="#workouts">💪 Workouts</a>
+  <a href="#shop">🛍️ Sportwinkel</a>
+  <a href="#kalender">✅ Kalender</a>
+  <a href="#naia">🐱 Naia-punten</a>
+  <a href="#tips">✨ Tips</a>
+</nav>
+
+<!-- ================= WEEKSCHEMA ================= -->
+<h2 id="schema">📅 Weekoverzicht</h2>
+<p class="lead">Om het doel in 8-10 weken te halen (in plaats van 14) trainen we iets vaker: <b>zaterdag wordt vanaf week 3 een vaste vierde workout</b>. In week 1-2 blijft zaterdag rustig opbouwen. Wandelingen op rustdagen blijven een vast onderdeel.</p>
+
+<div class="week">
+  <div class="day workout"><span class="emoji">🔥</span><div class="dname">Maandag</div><div class="dwhat">Full Body Fatburn</div><div class="dtime">± 30-35 min</div></div>
+  <div class="day rest"><span class="emoji">🚶‍♀️</span><div class="dname">Dinsdag</div><div class="dwhat">Rust + wandeling</div><div class="dtime">30-45 min wandelen</div></div>
+  <div class="day workout"><span class="emoji">🍑</span><div class="dname">Woensdag</div><div class="dwhat">Benen &amp; Billen</div><div class="dtime">± 35 min</div></div>
+  <div class="day rest"><span class="emoji">🚶‍♀️</span><div class="dname">Donderdag</div><div class="dwhat">Rust + wandeling</div><div class="dtime">30-45 min wandelen</div></div>
+  <div class="day workout"><span class="emoji">⚡</span><div class="dname">Vrijdag</div><div class="dwhat">Cardio HIIT + Core</div><div class="dtime">± 30 min</div></div>
+  <div class="day optional"><span class="emoji">💃</span><div class="dname">Zaterdag</div><div class="dwhat">Wk 1-2: actief &amp; leuk<br>Wk 3+: 4e workout</div><div class="dtime">30-60 min</div></div>
+  <div class="day rest"><span class="emoji">😴</span><div class="dname">Zondag</div><div class="dwhat">Volledige rust</div><div class="dtime">Naia knuffelen 🐈</div></div>
+</div>
+
+<!-- ================= DAG 1 ================= -->
+<h2 id="workouts">💪 De workouts, stap voor stap</h2>
+<p class="lead">Klik op een oefening om de <b>volledige uitleg</b> open te klappen: hoe je ze uitvoert, waar je op let, en hoe je ze zwaarder maakt zodra het materiaal uit de sportwinkel er is.</p>
+
+<div class="card">
+  <h3>🔥 Maandag · Full Body Fatburn <span class="badge">± 30-35 min</span></h3>
+  <p class="meta">3 rondes · 45 sec werken / 15 sec rust per oefening · 90 sec rust tussen rondes.</p>
+
+  <span class="phase">Warming-up · 5 min</span>
+  <p style="font-size:.88rem">1 min marcheren ter plaatse → 1 min rustige jumping jacks → 1 min arm- en heupcirkels → 1 min lichte squats → 1 min beenzwaaien (voor- en zijwaarts).</p>
+
+  <span class="phase">Circuit · 3 rondes</span>
+  <ul class="exlist">
+    <li><details><summary><span class="arrow">▶</span> 1. Squats <span class="dose">45 sec</span></summary>
+      <div class="how"><ol>
+        <li>Voeten op schouderbreedte, tenen lichtjes naar buiten.</li>
+        <li>Zak alsof je op een stoel gaat zitten: billen naar achteren, borst vooruit, rug recht.</li>
+        <li>Zak tot je bovenbenen ongeveer horizontaal zijn, duw dan door je hakken terug omhoog.</li>
+      </ol>
+      <span class="mistake">⚠️ Veelgemaakte fout: hakken die loskomen of knieën die naar binnen klappen.</span><br>
+      <span class="gear">🛍️ Met materiaal: mini-band net boven de knieën, of houd een gewichtje tegen je borst (goblet squat).</span></div>
+    </details></li>
+    <li><details><summary><span class="arrow">▶</span> 2. Jumping jacks <span class="dose">45 sec</span></summary>
+      <div class="how"><ol>
+        <li>Start rechtop, voeten samen, armen langs je lichaam.</li>
+        <li>Spring je voeten uit elkaar terwijl je armen boven je hoofd samenkomen.</li>
+        <li>Spring terug naar de startpositie en herhaal in een vlot ritme.</li>
+      </ol>
+      <span class="mistake">⚠️ Land zacht op de voorvoeten, niet plat op de hakken.</span></div>
+    </details></li>
+    <li><details><summary><span class="arrow">▶</span> 3. Push-ups (op knieën mag) <span class="dose">45 sec</span></summary>
+      <div class="how"><ol>
+        <li>Handen iets breder dan schouderbreedte op de grond, lichaam in een rechte lijn (of steun op je knieën).</li>
+        <li>Buig je armen en laat je borst richting de grond zakken, ellebogen schuin naar achteren (niet recht opzij).</li>
+        <li>Duw jezelf terug omhoog tot je armen gestrekt zijn.</li>
+      </ol>
+      <span class="mistake">⚠️ Laat je heupen niet doorzakken: span je buik aan.</span></div>
+    </details></li>
+    <li><details><summary><span class="arrow">▶</span> 4. Mountain climbers <span class="dose">45 sec</span></summary>
+      <div class="how"><ol>
+        <li>Start in een hoge plank: armen gestrekt, handen onder de schouders.</li>
+        <li>Trek één knie richting je borst, zet die voet terug en wissel meteen naar het andere been.</li>
+        <li>Wissel snel af, alsof je "loopt" in plankpositie, heupen laag houden.</li>
+      </ol>
+      <span class="mistake">⚠️ Billen niet omhoog steken: hou je rug vlak.</span></div>
+    </details></li>
+    <li><details><summary><span class="arrow">▶</span> 5. Reverse lunges <span class="dose">45 sec</span></summary>
+      <div class="how"><ol>
+        <li>Sta rechtop en stap met één been een grote stap naar achteren.</li>
+        <li>Zak recht naar beneden tot beide knieën ongeveer 90° zijn, achterste knie net boven de grond.</li>
+        <li>Duw via je voorste hak terug omhoog en wissel van been.</li>
+      </ol>
+      <span class="mistake">⚠️ Hou je romp rechtop, leun niet naar voren.</span><br>
+      <span class="gear">🛍️ Met materiaal: een dumbbell in elke hand langs je lichaam.</span></div>
+    </details></li>
+    <li><details><summary><span class="arrow">▶</span> 6. Plank <span class="dose">45 sec</span></summary>
+      <div class="how"><ol>
+        <li>Steun op je onderarmen en tenen, ellebogen onder je schouders.</li>
+        <li>Vorm één rechte lijn van hoofd tot hielen, span buik en billen aan.</li>
+        <li>Blijf rustig doorademen en hou vol.</li>
+      </ol>
+      <span class="mistake">⚠️ Niet doorzakken in de onderrug en billen niet omhoog. Te zwaar? Zet je knieën op de grond.</span></div>
+    </details></li>
+  </ul>
+  <div class="circuit-note">🐾 Na elke ronde 90 sec rust. Klaar? Vink de dag af in de kalender hieronder!</div>
+  <span class="phase">Cooldown · 5 min</span>
+  <p style="font-size:.88rem">1 min rustig uitstappen, daarna 4 min statisch stretchen: bovenbenen, kuiten, billen en schouders (elke stretch 20-30 sec).</p>
+</div>
+
+<!-- ================= DAG 2 ================= -->
+<div class="card">
+  <h3>🍑 Woensdag · Benen &amp; Billen <span class="badge">± 35 min</span></h3>
+  <p class="meta">3 rondes, rustig en gecontroleerd · 60-90 sec rust tussen rondes. Grote spiergroepen = veel calorieverbruik. Hiervan word je strakker, niet "gespierd".</p>
+
+  <span class="phase">Warming-up · 5 min</span>
+  <p style="font-size:.88rem">Zelfde als maandag, met extra aandacht voor heupcirkels en beenzwaaien.</p>
+
+  <span class="phase">Krachtcircuit · 3 rondes</span>
+  <ul class="exlist">
+    <li><details><summary><span class="arrow">▶</span> 1. Sumo squats <span class="dose">15×</span></summary>
+      <div class="how"><ol>
+        <li>Zet je voeten ruim breder dan je schouders, tenen duidelijk naar buiten.</li>
+        <li>Zak recht naar beneden (knieën volgen de richting van je tenen) tot je bovenbenen horizontaal zijn.</li>
+        <li>Knijp je billen samen terwijl je omhoog duwt.</li>
+      </ol>
+      <span class="mistake">⚠️ Niet voorover buigen: je romp blijft rechtop.</span><br>
+      <span class="gear">🛍️ Met materiaal: houd een dumbbell of kettlebell met beide handen voor je.</span></div>
+    </details></li>
+    <li><details><summary><span class="arrow">▶</span> 2. Glute bridges <span class="dose">20×</span></summary>
+      <div class="how"><ol>
+        <li>Lig op je rug, knieën gebogen, voeten plat op de grond vlakbij je billen.</li>
+        <li>Duw je heupen omhoog tot je lichaam een rechte lijn vormt van knieën tot schouders.</li>
+        <li>Knijp bovenaan 2 seconden hard je billen samen en zak dan rustig terug.</li>
+      </ol>
+      <span class="mistake">⚠️ Duw vanuit je hakken, niet je tenen, en maak geen holle rug.</span><br>
+      <span class="gear">🛍️ Met materiaal: mini-band boven de knieën (duw je knieën lichtjes naar buiten) of een gewichtje op je heupen.</span></div>
+    </details></li>
+    <li><details><summary><span class="arrow">▶</span> 3. Split squats (met stoel) <span class="dose">10× per been</span></summary>
+      <div class="how"><ol>
+        <li>Sta een grote stap voor een stoel en leg de wreef van je achterste voet op de zitting.</li>
+        <li>Zak recht naar beneden tot je voorste bovenbeen horizontaal is.</li>
+        <li>Duw via je voorste hak omhoog. Doe alle herhalingen en wissel dan van been.</li>
+      </ol>
+      <span class="mistake">⚠️ Voorste voet ver genoeg naar voren, anders komt je knie te ver voorbij je tenen.</span><br>
+      <span class="gear">🛍️ Met materiaal: een dumbbell in elke hand. Dé oefening voor rondere billen.</span></div>
+    </details></li>
+    <li><details><summary><span class="arrow">▶</span> 4. Romanian deadlift <span class="dose">12× · vanaf materiaal 🛍️</span></summary>
+      <div class="how"><ol>
+        <li>Sta rechtop met een dumbbell in elke hand vóór je bovenbenen, knieën lichtjes gebogen.</li>
+        <li>Duw je billen naar achteren en laat de gewichten langs je benen zakken tot net onder je knieën, rug kaarsrecht.</li>
+        <li>Voel de rek in je hamstrings en kom terug omhoog door je billen samen te knijpen.</li>
+      </ol>
+      <span class="mistake">⚠️ Rug rond maken is verboden: kijk schuin voor je uit en hou je borst open. Nog geen gewichtjes? Doe in de plaats 15× donkey kicks per been (op handen en knieën, been gestrekt omhoog trappen).</span></div>
+    </details></li>
+    <li><details><summary><span class="arrow">▶</span> 5. Side lunges <span class="dose">12× per been</span></summary>
+      <div class="how"><ol>
+        <li>Sta rechtop en stap met één been een grote stap opzij.</li>
+        <li>Buig dat been en zak erop, het andere been blijft volledig gestrekt.</li>
+        <li>Duw jezelf terug naar het midden en wissel van kant.</li>
+      </ol>
+      <span class="mistake">⚠️ Hou beide voeten naar voren gericht en je borst omhoog.</span></div>
+    </details></li>
+    <li><details><summary><span class="arrow">▶</span> 6. Wall sit <span class="dose">45 sec</span></summary>
+      <div class="how"><ol>
+        <li>Zet je rug plat tegen een muur en schuif naar beneden tot je knieën 90° maken.</li>
+        <li>Voeten op heupbreedte, gewicht op je hakken, handen los van je benen.</li>
+        <li>Blijf zitten en adem rustig door. Afzien mag 😽</li>
+      </ol>
+      <span class="mistake">⚠️ Handen niet op je knieën steunen, dat is vals spelen.</span></div>
+    </details></li>
+  </ul>
+  <span class="phase">Cooldown · 5 min</span>
+  <p style="font-size:.88rem">Stretchen van benen en billen: vlinderzit, duivenpose en quadriceps-stretch, elk 30 sec per kant.</p>
+</div>
+
+<!-- ================= DAG 3 ================= -->
+<div class="card">
+  <h3>⚡ Vrijdag · Cardio HIIT + Core <span class="badge">± 30 min</span></h3>
+  <p class="meta">HIIT: 3 rondes · 30 sec vol gas / 30 sec rust · 2 min rust tussen rondes. Daarna core-finisher (2 rondes).</p>
+
+  <span class="phase">Warming-up · 5 min</span>
+  <p style="font-size:.88rem">Zelfde als maandag. Zorg dat je écht warm bent voor je aan HIIT begint.</p>
+
+  <span class="phase">HIIT-blok · 3 rondes</span>
+  <ul class="exlist">
+    <li><details><summary><span class="arrow">▶</span> 1. High knees <span class="dose">30 sec</span></summary>
+      <div class="how"><ol>
+        <li>Loop ter plaatse en trek je knieën afwisselend zo hoog mogelijk op (richting heuphoogte).</li>
+        <li>Beweeg je armen actief mee, alsof je sprint.</li>
+        <li>Zo snel als je kan volhouden.</li>
+      </ol>
+      <span class="mistake">⚠️ Blijf op je voorvoeten, land niet op je hakken.</span></div>
+    </details></li>
+    <li><details><summary><span class="arrow">▶</span> 2. Squat jumps <span class="dose">30 sec</span></summary>
+      <div class="how"><ol>
+        <li>Zak in een gewone squat.</li>
+        <li>Spring vanuit de laagste positie explosief omhoog.</li>
+        <li>Land zacht met gebogen knieën, meteen door in de volgende squat.</li>
+      </ol>
+      <span class="mistake">⚠️ Te zwaar of te veel lawaai voor de buren? Doe snelle gewone squats.</span></div>
+    </details></li>
+    <li><details><summary><span class="arrow">▶</span> 3. Skaters <span class="dose">30 sec</span></summary>
+      <div class="how"><ol>
+        <li>Spring zijwaarts naar rechts en land op je rechterbeen, linkerbeen zwaait er schuin achter.</li>
+        <li>Spring meteen zijwaarts terug naar links en land op je linkerbeen.</li>
+        <li>Wissel vlot af, als een schaatser, armen zwaaien mee.</li>
+      </ol>
+      <span class="mistake">⚠️ Land zacht en licht gebogen, niet met gestrekte knie.</span></div>
+    </details></li>
+    <li><details><summary><span class="arrow">▶</span> 4. (Halve) burpees <span class="dose">30 sec</span></summary>
+      <div class="how"><ol>
+        <li>Zak door je knieën en zet je handen op de grond.</li>
+        <li>Spring of stap je voeten naar achteren tot een plank.</li>
+        <li>Spring of stap terug naar je handen en kom rechtop (met sprongetje voor de volledige versie).</li>
+      </ol>
+      <span class="mistake">⚠️ De halve versie (zonder push-up, zonder sprong) is helemaal prima: rustig stappen in plaats van springen.</span></div>
+    </details></li>
+  </ul>
+
+  <span class="phase">Core-finisher · 2 rondes</span>
+  <ul class="exlist">
+    <li><details><summary><span class="arrow">▶</span> 1. Crunches <span class="dose">20×</span></summary>
+      <div class="how"><ol>
+        <li>Lig op je rug, knieën gebogen, handen licht tegen je slapen.</li>
+        <li>Rol je schouderbladen van de grond door je buikspieren aan te spannen.</li>
+        <li>Zak rustig terug zonder je hoofd neer te leggen.</li>
+      </ol>
+      <span class="mistake">⚠️ Trek niet aan je nek: je handen duwen niet, je buik doet het werk.</span></div>
+    </details></li>
+    <li><details><summary><span class="arrow">▶</span> 2. Russian twists <span class="dose">20× (10 per kant)</span></summary>
+      <div class="how"><ol>
+        <li>Zit op de grond, knieën gebogen, leun licht naar achteren met rechte rug.</li>
+        <li>Draai je romp naar links en tik met je handen naast je heup.</li>
+        <li>Draai naar rechts en herhaal. Voeten mogen op de grond blijven.</li>
+      </ol>
+      <span class="gear">🛍️ Met materiaal: houd een gewichtje vast tijdens het draaien.</span></div>
+    </details></li>
+    <li><details><summary><span class="arrow">▶</span> 3. Leg raises <span class="dose">12×</span></summary>
+      <div class="how"><ol>
+        <li>Lig op je rug, benen gestrekt, handen onder je billen voor steun.</li>
+        <li>Hef je gestrekte benen tot 90° omhoog.</li>
+        <li>Laat ze traag zakken tot net boven de grond en herhaal.</li>
+      </ol>
+      <span class="mistake">⚠️ Duw je onderrug in de grond. Holle rug? Buig je knieën wat.</span></div>
+    </details></li>
+    <li><details><summary><span class="arrow">▶</span> 4. Plank <span class="dose">45 sec</span></summary>
+      <div class="how"><ol><li>Zelfde uitvoering als maandag. Laatste loodjes van de week!</li></ol></div>
+    </details></li>
+  </ul>
+  <span class="phase">Cooldown · 5 min</span>
+  <p style="font-size:.88rem">Rustig uitstappen en volledig stretchen. Weekend verdiend 🎀</p>
+</div>
+
+<!-- ================= ZATERDAG ================= -->
+<div class="card">
+  <h3>💃 Zaterdag · Week 1-2: leuk actief · Week 3+: 4e workout <span class="badge">30-60 min</span></h3>
+  <p class="meta">Deze extra dag is de sleutel om het doel in 8-10 weken te halen in plaats van 14.</p>
+  <table>
+    <tr><td class="ex">Week 1-2</td><td class="note">Iets actiefs dat je leuk vindt: stevige wandeling (45-60 min), fietstochtje, dansen op je favoriete playlist, zwemmen of een dance-workout op YouTube.</td></tr>
+    <tr><td class="ex">Week 3+</td><td class="note"><b>Herhaal de maandag-workout (Full Body Fatburn)</b>, of doe 40-60 min stevig doorwandelen/fietsen als je spieren nog te vermoeid zijn. Beide tellen als afgewerkte workout in de kalender.</td></tr>
+  </table>
+</div>
+
+<!-- ================= SHOP ================= -->
+<h2 id="shop">🛍️ Boodschappenlijstje voor de sportwinkel</h2>
+<p class="lead">Met dit kleine setje maak je alle oefeningen zwaarder naarmate je sterker wordt, dat houdt de vetverbranding hoog en geeft net dat beetje extra voor benen en billen.</p>
+<div class="card" style="margin-top:20px">
+  <ul class="shoplist">
+    <li>🎀 <b>Mini-weerstandsband (booty band), medium weerstand</b> — om boven de knieën te dragen bij squats, sumo squats en glute bridges. Klein prijsje, groot effect op de billen. Stof is comfortabeler dan rubber.</li>
+    <li>🏋️‍♀️ <b>Twee dumbbells van 4 à 5 kg</b> (of één verstelbare set) — voor goblet squats, lunges, split squats en de Romanian deadlift. Twijfel je tussen twee gewichten? Neem het zwaardere: 3 kg is snel te licht.</li>
+    <li>🧘‍♀️ <b>Fitnessmatje</b> — voor alle grond- en core-oefeningen, veel aangenamer dan de vloer.</li>
+    <li>🪢 <b>Optioneel: springtouw</b> — 5 min touwtjespringen is een topvervanger voor het HIIT-blok als afwisseling.</li>
+  </ul>
+  <div class="circuit-note" style="margin-top:14px">🐾 Vuistregel: de laatste 3 herhalingen van een set moeten lastig aanvoelen. Gaat alles vlotjes? Dan is het tijd voor de band of de gewichtjes.</div>
+</div>
+
+<!-- ================= KALENDER ================= -->
+<h2 id="kalender">✅ Afvinkkalender tot je doel</h2>
+<p class="lead">Vink elke afgewerkte workout af met een pootje. Onderweg passeer je <b>vier tussendoelen</b> die je zelf bevestigt. Alles wordt automatisch opgeslagen in je browser, gewoon het bestand terug openen en je vinkjes staan er nog.</p>
+
+<div class="card" style="margin-top:20px">
+  <div class="progressbar"><div class="fill" id="progFill"></div><div class="plabel" id="progLabel">0 van 32 workouts</div></div>
+  <p style="font-size:.8rem;opacity:.7;margin-bottom:6px">🐾 = verplichte workout (ma · wo · vr, vanaf week 3 ook za) · gestippeld = optioneel</p>
+
+  <div id="calendar"></div>
+
+  <div class="milestone" id="ms1">
+    <div class="mtxt"><b>🌸 Tussendoel 1 · einde week 2</b><div class="msub">De routine staat: 6 workouts afgewerkt en je eerste ± 1 kg is eraf. Het moeilijkste deel (beginnen) zit erop!</div></div>
+    <button class="btn" data-ms="ms1">Behaald! 🎉</button>
+  </div>
+  <div class="milestone" id="ms2">
+    <div class="mtxt"><b>🌷 Tussendoel 2 · einde week 4</b><div class="msub">± 2,5 kg eraf en het materiaal is in gebruik. Je merkt dat de workouts vlotter gaan dan in week 1.</div></div>
+    <button class="btn" data-ms="ms2">Behaald! 🎉</button>
+  </div>
+  <div class="milestone" id="ms3">
+    <div class="mtxt"><b>💗 Tussendoel 3 · einde week 7</b><div class="msub">± 4 à 4,5 kg eraf, ruim voorbij halfweg. Kleren zitten losser en de wall sit voelt (bijna) makkelijk.</div></div>
+    <button class="btn" data-ms="ms3">Behaald! 🎉</button>
+  </div>
+  <div class="milestone" id="ms4">
+    <div class="mtxt"><b>👑 Einddoel · week 8-10</b><div class="msub">−5 tot −7 kg: doel bereikt! Tijd om te vieren én een onderhoudsplan te kiezen (2-3 workouts per week volstaan om op gewicht te blijven).</div></div>
+    <button class="btn" data-ms="ms4">DOEL BEREIKT! 👑</button>
+  </div>
+</div>
+
+<!-- ================= NAIA ================= -->
+<h2 id="naia">🐱 Naia-punten · dagelijkse checklist</h2>
+<p class="lead">Elke dag waarop je alle drie de vakjes haalt, verdien je één <b>Naia-punt</b>. Deze dagelijkse gewoontes doen minstens evenveel voor het afvallen als de workouts zelf.</p>
+
+<div class="card" style="margin-top:20px">
+  <div class="naia-flex">
+    <div class="naia-today">
+      <p style="font-weight:800;color:var(--raspberry)" id="naiaDate"></p>
+      <label class="naia-item chk"><input type="checkbox" id="nWater"><span class="box"></span><span>💧 Genoeg gedronken<span class="hint">± 1,5-2 liter water vandaag</span></span></label>
+      <label class="naia-item chk"><input type="checkbox" id="nSteps"><span class="box"></span><span>👟 Stappen gehaald<span class="hint">minstens 8.000 stappen</span></span></label>
+      <label class="naia-item chk"><input type="checkbox" id="nFood"><span class="box"></span><span>🥗 Gezond gegeten<span class="hint">binnen je calorietekort gebleven, geen snaai-avond</span></span></label>
+      <button class="btn" id="naiaBtn" style="margin-top:14px" disabled>Dag afronden 🐾</button>
+      <div id="naiaMsg"></div>
+      <div class="naia-history" id="naiaHistory" aria-label="Laatste 7 dagen"></div>
+    </div>
+    <div class="naia-score">
+      <svg class="naia-cat" viewBox="0 0 120 110">
+        <polygon points="28,38 20,8 46,26" fill="#E8517F"/><polygon points="92,38 100,8 74,26" fill="#E8517F"/>
+        <circle cx="60" cy="62" r="40" fill="#E8517F"/>
+        <path d="M40 56 q5 -6 10 0" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path d="M70 56 q5 -6 10 0" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path d="M56 68 Q60 72 64 68 L60 74 Z" fill="#fff"/>
+        <path d="M60 74 Q52 82 46 78" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+        <path d="M60 74 Q68 82 74 78" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+      </svg>
+      <div class="num" id="naiaTotal">0</div>
+      <div class="lbl">Naia-punten verzameld</div>
+      <div class="lbl" style="opacity:.7;font-size:.75rem;margin-top:8px">Mik op minstens 5 per week 😽</div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= PROGRESSIE & TIPS ================= -->
+<h2 id="tips">✨ Progressie &amp; gouden tips</h2>
+<div class="card" style="margin-top:20px">
+  <table>
+    <thead><tr><th>Periode</th><th>Aanpassing</th></tr></thead>
+    <tr><td class="ex">Week 1-2</td><td>3 workouts, schema exact zoals hierboven. Focus op juiste uitvoering. Zaterdag: leuk en actief.</td></tr>
+    <tr><td class="ex">Week 3-4</td><td>Zaterdag wordt de 4e vaste workout. Materiaal erbij: band bij de squats en glute bridges, gewichtjes bij lunges en de Romanian deadlift.</td></tr>
+    <tr><td class="ex">Week 5-7</td><td>Circuits: 50 sec werken / 10 sec rust. Krachtdag: +2 à 3 herhalingen per oefening. Wall sit en planks naar 60 sec.</td></tr>
+    <tr><td class="ex">Week 8-10</td><td>Overal een 4e ronde toevoegen. HIIT naar 4 rondes. Laatste rechte lijn naar het doel!</td></tr>
+  </table>
+</div>
+
+<div class="tips">
+  <div class="tip"><b>🍽️ Voeding blijft de motor</b>Voor 5-7 kg in 8-10 weken is een tekort van ± 500 kcal per dag nodig, dat is strakker dan bij een traag schema, dus wees hier consequent: eiwitrijk ontbijt, groenten bij elke maaltijd, gesuikerde drankjes eruit.</div>
+  <div class="tip"><b>🐢 Eerlijk over het tempo</b>0,6-0,7 kg per week is haalbaar maar pittig. Zit je na 10 weken op −5 in plaats van −7? Dan is dat gewoon geslaagd: liever iets trager en blijvend dan snel en terug erbij.</div>
+  <div class="tip"><b>💪 Materiaal = betere billen</b>De band en gewichtjes maken je niet ineens gespierd, daar zijn jaren zware training voor nodig. Ze zorgen wél dat je billen en benen strakker en ronder worden terwijl je afvalt.</div>
+  <div class="tip"><b>👟 Stappen zijn stille goud</b>8.000-10.000 stappen per dag verbrandt over een week vaak méér dan de workouts zelf. Daarom staat het in je dagelijkse Naia-checklist.</div>
+  <div class="tip"><b>📏 Meet slim</b>Weeg 1× per week, 's ochtends, zelfde dag. Dagelijkse schommelingen zijn vocht, geen vet. Foto's om de 2 weken zeggen meer dan de weegschaal.</div>
+  <div class="tip"><b>😴 Herstel telt mee</b>7-9 uur slaap maakt afvallen bewezen makkelijker: minder honger, meer energie. Zondag is heilig: volledige rust met Naia op schoot.</div>
+</div>
+
+<footer>
+  <div class="paw-row">
+    <svg viewBox="0 0 64 64" fill="#E8517F"><ellipse cx="32" cy="42" rx="14" ry="11"/><circle cx="14" cy="26" r="6"/><circle cx="26" cy="18" r="6"/><circle cx="38" cy="18" r="6"/><circle cx="50" cy="26" r="6"/></svg>
+    <svg viewBox="0 0 64 64" fill="#F79FC0"><ellipse cx="32" cy="42" rx="14" ry="11"/><circle cx="14" cy="26" r="6"/><circle cx="26" cy="18" r="6"/><circle cx="38" cy="18" r="6"/><circle cx="50" cy="26" r="6"/></svg>
+    <svg viewBox="0 0 64 64" fill="#E8517F"><ellipse cx="32" cy="42" rx="14" ry="11"/><circle cx="14" cy="26" r="6"/><circle cx="26" cy="18" r="6"/><circle cx="38" cy="18" r="6"/><circle cx="50" cy="26" r="6"/></svg>
+  </div>
+  Elke workout is een pootje dichter bij je doel, en Naia kijkt toe 🐾
+  <p class="storage-note">Je voortgang wordt bewaard in de browser van je eigen toestel. Gebruik altijd hetzelfde icoontje of dezelfde browser, dan staan je pootjes er nog.</p>
+</footer>
+
+</div>
+
+<script>
+(function(){
+  var KEY = "kittyfit-v2";
+  var memory = {};
+  function load(){
+    try{ return JSON.parse(localStorage.getItem(KEY)) || {}; }
+    catch(e){ return memory; }
+  }
+  function save(state){
+    try{ localStorage.setItem(KEY, JSON.stringify(state)); }
+    catch(e){ memory = state; }
+  }
+  var state = load();
+  state.workouts = state.workouts || {};
+  state.milestones = state.milestones || {};
+  state.naia = state.naia || {};
+
+  /* ---------- KALENDER ---------- */
+  var WEEKS = 10;
+  var calEl = document.getElementById("calendar");
+  var totalRequired = 0;
+
+  for(var w=1; w<=WEEKS; w++){
+    var row = document.createElement("div");
+    row.className = "weekrow";
+    var days = [
+      {id:"ma", label:"Ma", optional:false},
+      {id:"wo", label:"Wo", optional:false},
+      {id:"vr", label:"Vr", optional:false},
+      {id:"za", label:"Za", optional: w<=2}
+    ];
+    var html = '<span class="wlabel">Week '+w+'</span>';
+    days.forEach(function(d){
+      var key = "w"+w+"-"+d.id;
+      if(!d.optional) totalRequired++;
+      html += '<label class="chk'+(d.optional?' optional':'')+'">'+
+              '<input type="checkbox" data-key="'+key+'"'+(state.workouts[key]?' checked':'')+'>'+
+              '<span class="box"></span><span>'+d.label+(d.optional?' (opt.)':'')+'</span></label>';
+    });
+    row.innerHTML = html;
+    calEl.appendChild(row);
+  }
+
+  function updateProgress(){
+    var done = 0;
+    calEl.querySelectorAll('input[type=checkbox]').forEach(function(cb){
+      if(cb.checked && !cb.closest('.chk').classList.contains('optional')) done++;
+    });
+    var pct = Math.round(done/totalRequired*100);
+    document.getElementById("progFill").style.width = pct+"%";
+    document.getElementById("progLabel").textContent = done+" van "+totalRequired+" workouts ("+pct+"%)";
+  }
+
+  calEl.addEventListener("change", function(e){
+    if(e.target.matches("input[type=checkbox]")){
+      state.workouts[e.target.dataset.key] = e.target.checked;
+      save(state);
+      updateProgress();
+    }
+  });
+  updateProgress();
+
+  /* ---------- TUSSENDOELEN ---------- */
+  document.querySelectorAll("[data-ms]").forEach(function(btn){
+    var id = btn.dataset.ms;
+    function render(){
+      if(state.milestones[id]){
+        btn.classList.add("done");
+        btn.textContent = "✔ Behaald op "+state.milestones[id];
+      }
+    }
+    render();
+    btn.addEventListener("click", function(){
+      if(state.milestones[id]) return;
+      var d = new Date();
+      state.milestones[id] = d.getDate()+"/"+(d.getMonth()+1);
+      save(state);
+      render();
+    });
+  });
+
+  /* ---------- NAIA-PUNTEN ---------- */
+  function todayKey(){
+    var d = new Date();
+    return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  }
+  var dagen = ["zondag","maandag","dinsdag","woensdag","donderdag","vrijdag","zaterdag"];
+  var maanden = ["januari","februari","maart","april","mei","juni","juli","augustus","september","oktober","november","december"];
+  var now = new Date();
+  document.getElementById("naiaDate").textContent =
+    "Vandaag · "+dagen[now.getDay()]+" "+now.getDate()+" "+maanden[now.getMonth()];
+
+  var boxes = ["nWater","nSteps","nFood"].map(function(id){ return document.getElementById(id); });
+  var naiaBtn = document.getElementById("naiaBtn");
+  var naiaMsg = document.getElementById("naiaMsg");
+  var tk = todayKey();
+  var todayData = state.naia[tk] || {};
+
+  boxes.forEach(function(cb){
+    cb.checked = !!todayData[cb.id];
+    cb.addEventListener("change", function(){
+      todayData[cb.id] = cb.checked;
+      state.naia[tk] = todayData;
+      save(state);
+      refreshNaia();
+    });
+  });
+
+  function countPoints(){
+    var n = 0;
+    for(var k in state.naia){ if(state.naia[k].done) n++; }
+    return n;
+  }
+
+  function refreshNaia(){
+    var all = boxes.every(function(cb){ return cb.checked; });
+    if(todayData.done){
+      naiaBtn.disabled = true;
+      naiaBtn.textContent = "Naia-punt verdiend! 🐱💗";
+      naiaMsg.textContent = "Naia is trots op je. Tot morgen!";
+      boxes.forEach(function(cb){ cb.disabled = true; });
+    } else {
+      naiaBtn.disabled = !all;
+      naiaBtn.textContent = "Dag afronden 🐾";
+      naiaMsg.textContent = all ? "Alle drie gehaald, klik om je punt te verzilveren!" : "";
+    }
+    document.getElementById("naiaTotal").textContent = countPoints();
+    renderHistory();
+  }
+
+  naiaBtn.addEventListener("click", function(){
+    todayData.done = true;
+    state.naia[tk] = todayData;
+    save(state);
+    refreshNaia();
+  });
+
+  function renderHistory(){
+    var el = document.getElementById("naiaHistory");
+    el.innerHTML = "";
+    for(var i=6;i>=0;i--){
+      var d = new Date(); d.setDate(d.getDate()-i);
+      var k = d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+      var dot = document.createElement("span");
+      var won = state.naia[k] && state.naia[k].done;
+      dot.className = "dot"+(won?" won":"");
+      dot.textContent = won ? "🐾" : dagen[d.getDay()].charAt(0).toUpperCase();
+      dot.title = dagen[d.getDay()]+" "+d.getDate()+"/"+(d.getMonth()+1);
+      el.appendChild(dot);
+    }
+  }
+  refreshNaia();
+})();
+</script>
+</body>
+</html>
